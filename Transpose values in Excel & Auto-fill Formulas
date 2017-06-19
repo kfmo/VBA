@@ -1,0 +1,233 @@
+Sub transposeCells()
+
+    'Delete all but the first rows to clear sheets
+    Sheet3.Rows(4 & ":" & Sheet3.Rows.Count).Delete
+    Sheet4.Rows(3 & ":" & Sheet4.Rows.Count).Delete
+    
+    Dim startCell As Range
+    Dim startCellTrans As Range
+    Dim endCell As Range
+    Dim endCellTrans As Range
+    Dim cellRange As Range
+    Dim cellRangeTrans As Range
+    Dim i As Variant
+    Dim k As Integer
+    Dim j As Integer
+    Dim m As Integer
+    Dim rng1 As Range
+    Dim rng2 As Range
+    Dim rng3 As Range
+    Dim rng4 As Range
+    Dim rng5 As Range
+    Dim rng6 As Range
+    Dim myChart As Chart
+    Dim sr As Series
+    Dim srLineWts As Series
+    
+    'set initial values
+    j = 1
+    k = 1
+    m = 1
+        
+    'Copy values from Sheet1 to Sheet2
+    'input box to select cell range to be copied
+    Worksheets("DailyInput left column").Activate
+    On Error GoTo eh1
+    Application.DisplayAlerts = False
+    Set startCell = Sheet1.Application.InputBox("Select first cell of range to transpose", "First Cell to be Transposed", Type:=8)
+        
+    On Error GoTo Skipped_copyEndCell
+    Set endCell = Sheet1.Application.InputBox("Select last cell of range to transpose (optional)", "Last Cell to be Transposed", Type:=8)
+    
+Skipped_copyEndCell:
+    Application.DisplayAlerts = True
+    
+    If Not endCell Is Nothing Then
+        Set cellRange = Sheet1.Range(startCell.Address & ":" & endCell.Address)
+    Else 'iterate to last value in range
+        Set endCell = Sheet1.Range("E13")
+        Set cellRange = Sheet1.Range(startCell.Address & ":" & endCell.End(xlDown).Address)
+    End If
+        
+    'for loop to select and copy cells with values
+    If Not IsEmpty(Sheet1.Range(startCell.Address)) Then
+        For Each i In cellRange
+            If j <= cellRange.Count Then
+                Sheet3.Cells(j + 2, 1) = Sheet1.Range(i.Address)
+                j = j + 1
+            End If
+        Next i
+    Else
+        MsgBox "First cell of range is empty.  Please select a non-empty cell.", vbOKOnly Or vbCritical, "Reselect First Cell"
+        Exit Sub
+    End If
+
+
+
+    
+eh2:
+    'Transpose copied values
+    'input box to select cell range to transpose copied values
+    On Error GoTo -1
+    Worksheets("Form-RT_Calc_DailyInputLeftCol").Activate
+    On Error GoTo eh2
+    Application.DisplayAlerts = False
+    Set startCellTrans = Sheet3.Application.InputBox("Select first cell in row to paste", "First Cell to Paste", Type:=8)
+            
+    m = Sheet3.Range(startCellTrans.Address).Row - 2
+            
+    On Error GoTo Skipped_transposeEndCell
+    Set endCellTrans = Sheet3.Application.InputBox("Select last cell in row to paste (optional) [default: increments of 5]", "Last Cell to Paste", Type:=8)
+    
+Skipped_transposeEndCell:
+    Application.DisplayAlerts = True
+    
+    If Not endCellTrans Is Nothing Then
+        Set cellRangeTrans = Sheet3.Range(startCellTrans.Address & ":" & endCellTrans.Address)
+        n = cellRangeTrans.Count
+    Else
+        Set endCellTrans = Sheet3.Range("A1") 'to eliminate runtime error 424
+        n = 5 'default to n = 5
+    End If
+    
+    'transpose values in increments of n to rows (i.e., 1st five values to row 1, 2nd five to row 2, so on...)
+    If n >= 5 Then
+        While k <= cellRange.Count
+            Sheet3.Range("C" & m + 2).Resize(1, n) = Sheet3.Application.WorksheetFunction.Transpose(Range("A" & k + 2).Resize(n, 1))
+            m = m + 1
+            k = k + n
+        Wend
+    End If
+    
+    
+    
+    
+    On Error GoTo -1
+    On Error GoTo eh1
+    
+    'Fill formulas down to last row in Form-RT_Calc (Sheet3)
+    lastRow = Sheet3.Range("G3").End(xlDown).Row
+    
+    With Sheet3
+        .Range("B3").AutoFill Range("B3:B" & lastRow)
+        .Range("H3:Y3").AutoFill Range("H3:H" & lastRow, "Y3:Y" & lastRow)
+        .Range("Z3").Copy
+        .Range("Z3:Z" & lastRow).PasteSpecial xlPasteValuesAndNumberFormats
+        .Range("AA3").AutoFill Range("AA3:AA" & lastRow)
+        .Range("AD1").Formula = "=AVERAGE(H3:H" & lastRow & ")"
+        .Range("AG1").Formula = "=AVERAGE(R3:R" & lastRow & ")"
+        .Range("AJ1").Formula = "=AG1/2.326"
+    End With
+
+    'Assign formulas to first row in Form-RT_Plot (Sheet4)
+    Worksheets("Form-RT_Plot_DailyInputLeftCol").Activate
+    With Sheet4
+        .Range("A3").Formula = "=5*ROW(A1)"
+        .Range("B3").Formula = "=IF('Form-RT_Calc_DailyInputLeftCol'!$H3>'Form-RT_Calc_DailyInputLeftCol'!J3,'Form-RT_Calc_DailyInputLeftCol'!$H3,"" "")"
+        .Range("C3").Formula = "=IF(AND('Form-RT_Calc_DailyInputLeftCol'!$H3>'Form-RT_Calc_DailyInputLeftCol'!K3, 'Form-RT_Calc_DailyInputLeftCol'!$H3<='Form-RT_Calc_DailyInputLeftCol'!J3),'Form-RT_Calc_DailyInputLeftCol'!$H3,"" "")"
+        .Range("D3").Formula = "=IF(AND('Form-RT_Calc_DailyInputLeftCol'!$H3>'Form-RT_Calc_DailyInputLeftCol'!L3, 'Form-RT_Calc_DailyInputLeftCol'!$H3<='Form-RT_Calc_DailyInputLeftCol'!K3),'Form-RT_Calc_DailyInputLeftCol'!$H3,"" "")"
+        .Range("E3").Formula = "=ISTEXT($B3)*1"
+        .Range("F3").Formula = "=ISTEXT($C3)*1"
+        .Range("G3").Formula = "=ISTEXT($D3)*1"
+        .Range("H3").Formula = "=IF('Form-RT_Calc_DailyInputLeftCol'!$H3>'Form-RT_Calc_DailyInputLeftCol'!$M3,1,0)"
+        .Range("I3").Formula = "=IF(OR(SUM($E1:$F3)=10, SUM($E1:$F3)=11), IF($E3=0,$B3,IF($F3=0,$C3,""N/A"")), ""N/A"")"
+        .Range("J3").Formula = "=IF(OR(SUM($E$4:$G$4)=10, SUM($E$4:$G$4)=11), IF($E3=0,$B3,IF($F3=0,$C3,IF($G3=0,$D3,""N/A""))), ""N/A"")"
+        .Range("K3").Formula = "=IF(SUM($H$2:$H$9)=80,'Form-RT_Calc_DailyInputLeftCol'!$H3,""N/A"")"
+        .Range("L3").Formula = "=IF(ISNONTEXT($B3)*1=1, $B3, "" "")"
+        .Range("M3").Formula = "=IF(AND(ISNONTEXT($I3)*1=1, ISNONTEXT($B3)*1=0,ISNONTEXT($K3)*1=0), $I3, "" "")"
+        .Range("N3").Formula = "=IF(AND(ISNONTEXT($J3)*1=1, ISNONTEXT($B3)*1=0, ISNONTEXT($I3)*1=0, ISNONTEXT($K3)*1=0), $J3, "" "")"
+        .Range("O3").Formula = "=IF(AND(ISNONTEXT($K3)*1=1, ISNONTEXT($B3)*1=0), $K3, "" "")"
+        .Range("P3").Formula = "=IF(AND(ISNONTEXT($T3)*1=1, ISNONTEXT($AC3)*1=0), $T3, "" "")"
+        .Range("Q3").Formula = "=IF(AND(ISNONTEXT($U3)*1=1, ISNONTEXT($AC3)*1=0, ISNONTEXT($V3)*1=0, ISNONTEXT($T3)*1=0), $U3, "" "")"
+        .Range("R3").Formula = "=IF(AND(ISNONTEXT($V3)*1=1, ISNONTEXT($AC3)*1=0,ISNONTEXT($T3)*1=0), $V3, "" "")"
+        .Range("S3").Formula = "=IF(ISNONTEXT($AC3)*1=1, $AC3, "" "")"
+        .Range("T3").Formula = "=IF(SUM($H$2:$H$9)=80,'Form-RT_Calc_DailyInputLeftCol'!$H1,""N/A"")"
+        .Range("U3").Formula = "=IF(OR(SUM($E$4:$G$4)=10, SUM($E$4:$G$4)=11), IF($E3=0,$B3,IF($F3=0,$C3,IF($G3=0,$D3,""N/A""))), ""N/A"")"
+        .Range("V3").Formula = "=IF(OR(SUM($E1:$F3)=10, SUM($E1:$F3)=11), IF($E3=0,$B3,IF($F3=0,$C3,""N/A"")), ""N/A"")"
+        .Range("W3").Formula = "=IF('Form-RT_Calc_DailyInputLeftCol'!$H3<'Form-RT_Calc_DailyInputLeftCol'!$M3,1,0)"
+        .Range("X3").Formula = "=ISTEXT($AA3)*1"
+        .Range("Y3").Formula = "=ISTEXT($AB3)*1"
+        .Range("Z3").Formula = "=ISTEXT($AC3)*1"
+        .Range("AA3").Formula = "=IF(AND('Form-RT_Calc_DailyInputLeftCol'!$H3<'Form-RT_Calc_DailyInputLeftCol'!N3, 'Form-RT_Calc_DailyInputLeftCol'!$H3>='Form-RT_Calc_DailyInputLeftCol'!O3),'Form-RT_Calc_DailyInputLeftCol'!$H3,"" "")"
+        .Range("AB3").Formula = "=IF(AND('Form-RT_Calc_DailyInputLeftCol'!$H3<'Form-RT_Calc_DailyInputLeftCol'!O3, 'Form-RT_Calc_DailyInputLeftCol'!$H3>='Form-RT_Calc_DailyInputLeftCol'!P3),'Form-RT_Calc_DailyInputLeftCol'!$H3,"" "")"
+        .Range("AC3").Formula = "=IF('Form-RT_Calc_DailyInputLeftCol'!$H3<'Form-RT_Calc_DailyInputLeftCol'!P3,'Form-RT_Calc_DailyInputLeftCol'!$H3,"" "")"
+        .Range("AD3").Formula = "=IF('Form-RT_Calc_DailyInputLeftCol'!$R3>'Form-RT_Calc_DailyInputLeftCol'!T3,'Form-RT_Calc_DailyInputLeftCol'!$R3,"" "")"
+        .Range("AE3").Formula = "=IF(AND('Form-RT_Calc_DailyInputLeftCol'!$R3>'Form-RT_Calc_DailyInputLeftCol'!U3, 'Form-RT_Calc_DailyInputLeftCol'!$R3<='Form-RT_Calc_DailyInputLeftCol'!T3),'Form-RT_Calc_DailyInputLeftCol'!$R3,"" "")"
+        .Range("AF3").Formula = "=IF(AND('Form-RT_Calc_DailyInputLeftCol'!$R3>'Form-RT_Calc_DailyInputLeftCol'!V3, 'Form-RT_Calc_DailyInputLeftCol'!$R3<='Form-RT_Calc_DailyInputLeftCol'!U3),'Form-RT_Calc_DailyInputLeftCol'!$R3,"" "")"
+        .Range("AG3").Formula = "=ISTEXT($AD3)*1"
+        .Range("AH3").Formula = "=ISTEXT($AE3)*1"
+        .Range("AI3").Formula = "=ISTEXT($AF3)*1"
+        .Range("AJ3").Formula = "=IF('Form-RT_Calc_DailyInputLeftCol'!$R3>'Form-RT_Calc_DailyInputLeftCol'!$W3,1,0)"
+        .Range("AK3").Formula = "=IF(OR(SUM($E1:$F3)=10, SUM($E1:$F3)=11), IF($E3=0,$B3,IF($F3=0,$C3,""N/A"")), ""N/A"")"
+        .Range("AL3").Formula = "=IF(OR(SUM($E$4:$G$4)=10, SUM($E$4:$G$4)=11), IF($E3=0,$B3,IF($F3=0,$C3,IF($G3=0,$D3,""N/A""))), ""N/A"")"
+        .Range("AM3").Formula = "=IF(SUM($H$2:$H$9)=80,'Form-RT_Calc_DailyInputLeftCol'!$H1,""N/A"")"
+        .Range("AN3").Formula = "=IF(ISNONTEXT($AD3)*1=1,$AD3, -100)"
+        .Range("AO3").Formula = "=IF(AND(ISNONTEXT($AK3)*1=1, ISNONTEXT($AD3)*1=0,ISNONTEXT($AM3)*1=0), $AK3, -100)"
+        .Range("AP3").Formula = "=IF(AND(ISNONTEXT($AL3)*1=1, ISNONTEXT($AD3)*1=0, ISNONTEXT($AK3)*1=0, ISNONTEXT($AM3)*1=0), $AL3, -100)"
+        .Range("AQ3").Formula = "=IF(AND(ISNONTEXT($AM3)*1=1, ISNONTEXT($AD3)*1=0), $AM3, -100)"
+        .Range("AR3").Formula = "=IF(ISNONTEXT($AU3)*1=1, $AU3, -100)"
+        .Range("AS3").Formula = "=IF(AND(ISNONTEXT($AV3)*1=1, ISNONTEXT($AW3)*1=0, ISNONTEXT($AU3)*1=0), $AV3, -100)"
+        .Range("AT3").Formula = "=IF(AND(ISNONTEXT($AW3)*1=1, ISNONTEXT($AU3)*1=0), $AW3, -100)"
+        .Range("AU3").Formula = "=IF(SUM($H$2:$H$9)=80,'Form-RT_Calc_DailyInputLeftCol'!$H1,""N/A"")"
+        .Range("AV3").Formula = "=IF(OR(SUM($E$4:$G$4)=10, SUM($E$4:$G$4)=11), IF($E3=0,$B3,IF($F3=0,$C3,IF($G3=0,$D3,""N/A""))), ""N/A"")"
+        .Range("AW3").Formula = "=IF(OR(SUM($E1:$F3)=10, SUM($E1:$F3)=11), IF($E3=0,$B3,IF($F3=0,$C3,""N/A"")), ""N/A"")"
+        .Range("AX3").Formula = "=IF('Form-RT_Calc_DailyInputLeftCol'!$R3<'Form-RT_Calc_DailyInputLeftCol'!$W3,1,0)"
+        .Range("AY3").Formula = "=ISTEXT($BA3)*1"
+        .Range("AZ3").Formula = "=ISTEXT($BB3)*1"
+        .Range("BA3").Formula = "=IF(AND('Form-RT_Calc_DailyInputLeftCol'!$R3<'Form-RT_Calc_DailyInputLeftCol'!X3, 'Form-RT_Calc_DailyInputLeftCol'!$R3>='Form-RT_Calc_DailyInputLeftCol'!Y3),'Form-RT_Calc_DailyInputLeftCol'!$R3,"" "")"
+        .Range("BB3").Formula = "=IF(AND('Form-RT_Calc_DailyInputLeftCol'!$R3<'Form-RT_Calc_DailyInputLeftCol'!Y3, 'Form-RT_Calc_DailyInputLeftCol'!$R3>='Form-RT_Calc_DailyInputLeftCol'!Z3),'Form-RT_Calc_DailyInputLeftCol'!$R3,"" "")"
+        .Range("BC3").Formula = "=1*row($A1)"
+        
+        'Start on row after "N/A"
+        .Range("I5").Formula = "=IF(OR(SUM($E3:$F5)=3, SUM($E3:$F5)=4), IF($E5=0,$B5,IF($F5=0,$C5,"" "")), "" "")"
+        .Range("J7").Formula = "=IF(OR(SUM($E3:$G7)=10, SUM($E3:$G7)=11), IF($E7=0,$B7,IF($F7=0,$C7,IF($G7=0,$D7,"" ""))), "" "")"
+        .Range("K10").Formula = "=IF(SUM($H3:$H10)=8,'Form-RT_Calc_DailyInputLeftCol'!$H10,"" "")"
+        .Range("T10").Formula = "=IF(SUM($W3:$W10)=8,'Form-RT_Calc_DailyInputLeftCol'!$H10,"" "")"
+        .Range("U7").Formula = "=IF(OR(SUM($X3:$Z7)=10, SUM($X3:$Z7)=11), IF($X7=0,$AA7,IF($Y7=0,$AB7,IF($Z7=0,$AC7,"" ""))), "" "")"
+        .Range("V5").Formula = "=IF(OR(SUM($Y3:$Z5)=3, SUM($Y3:$Z5)=4), IF($Y5=0,$AB5,IF($Z5=0,$AC5,"" "")), "" "")"
+        .Range("AK5").Formula = "=IF(OR(SUM($AG3:$AH5)=3, SUM($AG3:$AH5)=4), IF($AG5=0,$AD5,IF($AH5=0,$AE5,"" "")), "" "")"
+        .Range("AL7").Formula = "=IF(OR(SUM($AG3:$AI7)=10, SUM($AG3:$AI7)=11), IF($AG7=0,$AD7,IF($AH7=0,$AE7,IF($AI7=0,$AF7,"" ""))), "" "")"
+        .Range("AM10").Formula = "=IF(SUM($AJ3:$AJ10)=8,'Form-RT_Calc_DailyInputLeftCol'!$R10,"" "")"
+        .Range("AU10").Formula = "=IF(SUM($AX3:$AX10)=8,'Form-RT_Calc_DailyInputLeftCol'!$R10,"" "")"
+        .Range("AV7").Formula = "=IF(OR(SUM($AY3:$AZ7)=6, SUM($AY3:$AZ7)=5), IF($AY7=0,$BA7,IF($AZ7=0,$BB7, "" "")), "" "")"
+        .Range("AW5").Formula = "=IF(OR(SUM($AZ3:$AZ5)=0, SUM($AZ3:$AZ5)=1), IF($AZ5=0,$BB5,"" ""), "" "")"
+        
+        'Fill formulas down to last row
+        .Range("A3:H3").AutoFill Range("A3:A" & lastRow, "H3:H" & lastRow)
+        .Range("I3").AutoFill Range("I3:I4")
+        .Range("I5").AutoFill Range("I5:I" & lastRow)
+        .Range("J3").AutoFill Range("J3:J6")
+        .Range("J7").AutoFill Range("J7:J" & lastRow)
+        .Range("K3").AutoFill Range("K3:K9")
+        .Range("K10").AutoFill Range("K10:K" & lastRow)
+        .Range("L3:S3").AutoFill Range("L3:L" & lastRow, "S3:S" & lastRow)
+        .Range("V3").AutoFill Range("V3:V4")
+        .Range("V5").AutoFill Range("V5:V" & lastRow)
+        .Range("U3").AutoFill Range("U3:U6")
+        .Range("U7").AutoFill Range("U7:U" & lastRow)
+        .Range("T3").AutoFill Range("T3:T9")
+        .Range("T10").AutoFill Range("T10:T" & lastRow)
+        .Range("W3:AJ3").AutoFill Range("W3:W" & lastRow, "AJ3:AJ" & lastRow)
+        .Range("AK3").AutoFill Range("AK3:AK4")
+        .Range("AK5").AutoFill Range("AK5:AK" & lastRow)
+        .Range("AL3").AutoFill Range("AL3:AL6")
+        .Range("AL7").AutoFill Range("AL7:AL" & lastRow)
+        .Range("AM3").AutoFill Range("AM3:AM9")
+        .Range("AM10").AutoFill Range("AM10:AM" & lastRow)
+        .Range("AN3:AT3").AutoFill Range("AN3:AN" & lastRow, "AT3:AT" & lastRow)
+        .Range("AW3").AutoFill Range("AW3:AW4")
+        .Range("AW5").AutoFill Range("AW5:AW" & lastRow)
+        .Range("AV3").AutoFill Range("AV3:AV6")
+        .Range("AV7").AutoFill Range("AV7:AV" & lastRow)
+        .Range("AU3").AutoFill Range("AU3:AU9")
+        .Range("AU10").AutoFill Range("AU10:AU" & lastRow)
+        .Range("AX3:BC3").AutoFill Range("AX3:AX" & lastRow, "BC3:BC" & lastRow)
+    End With
+    
+    
+    
+    
+eh1:
+    Exit Sub
+    
+End Sub
