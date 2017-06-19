@@ -1,0 +1,158 @@
+Sub embedXbarChart()
+
+    Dim n As Integer 'Should be set globally if used in conjunction with transposeCells or some other sub/func
+    Dim lastRow As Integer 'Should be set globally if used in conjunction with transposeCells or some other sub/func
+    Dim myXbarChart As Chart
+    Dim sr As Series
+    Dim srLineWts As Series
+    
+    n = 5 'arbitrary - see transposeCells for details
+    lastRow = 20 'arbitrary - see transposeCells for details
+      
+    'Create a new chart
+    Set myXbarChart = Charts.Add
+    Set myXbarChart = myXbarChart.Location(Where:=xlLocationAsObject, Name:="DailyInput left column")
+    
+    With myXbarChart
+      .ChartType = xlXYScatterLines
+      
+      'Set data source range
+      .SetSourceData Source:=Sheets("Form-RT_Calc_DailyInputLeftCol").Range("I3:P" & lastRow), PlotBy:=xlColumns
+      .SeriesCollection.Add Sheets("Form-RT_Calc_DailyInputLeftCol").Range("H3:H" & lastRow)
+      .SeriesCollection.Add Source:=Sheets("Form-RT_Plot_DailyInputLeftCol").Range("K3:S" & lastRow)
+      
+      For Each sr In .SeriesCollection
+          sr.XValues = Sheets("Form-RT_Calc_DailyInputLeftCol").Range("AA3:AA" & lastRow)
+      Next sr
+   
+      'Name series
+      .SeriesCollection(1).Name = "+3Sigma"
+      .SeriesCollection(2).Name = "+2Sigma"
+      .SeriesCollection(3).Name = "+Sigma"
+      .SeriesCollection(4).Name = "Center Line"
+      .SeriesCollection(5).Name = "-Sigma"
+      .SeriesCollection(6).Name = "-2Sigma"
+      .SeriesCollection(7).Name = "-3Sigma"
+      .SeriesCollection(8).Name = "Xbar"
+      .SeriesCollection(9).Name = "Xbar > +3Sigma"
+      .SeriesCollection(10).Name = "2 of 3 > +2Sigma"
+      .SeriesCollection(11).Name = "4 of 5 > +Sigma"
+      .SeriesCollection(12).Name = "8 in a row > CL"
+      .SeriesCollection(13).Name = "8 in a row < CL"
+      .SeriesCollection(14).Name = "4 of 5 < -Sigma"
+      .SeriesCollection(15).Name = "2 of 3 < -2Sigma"
+      .SeriesCollection(16).Name = "Xbar < -3Sigma"
+      
+      'Modify line colors
+      .SeriesCollection(1).Format.Line.ForeColor.RGB = RGB(255, 0, 0)
+      .SeriesCollection(2).Format.Line.ForeColor.RGB = RGB(255, 215, 0)
+      .SeriesCollection(3).Format.Line.ForeColor.RGB = RGB(0, 191, 255)
+      .SeriesCollection(4).Format.Line.ForeColor.RGB = RGB(50, 205, 50)
+      .SeriesCollection(7).Format.Line.ForeColor.RGB = RGB(255, 0, 0)
+      .SeriesCollection(6).Format.Line.ForeColor.RGB = RGB(255, 215, 0)
+      .SeriesCollection(5).Format.Line.ForeColor.RGB = RGB(0, 191, 255)
+      .SeriesCollection(8).Format.Line.ForeColor.RGB = RGB(0, 0, 0)
+      .SeriesCollection(9).Format.Line.ForeColor.RGB = RGB(0, 0, 0)
+      .SeriesCollection(10).Format.Line.ForeColor.RGB = RGB(0, 0, 0)
+      .SeriesCollection(11).Format.Line.ForeColor.RGB = RGB(0, 0, 0)
+      .SeriesCollection(12).Format.Line.ForeColor.RGB = RGB(0, 0, 0)
+      .SeriesCollection(13).Format.Line.ForeColor.RGB = RGB(0, 0, 0)
+      .SeriesCollection(14).Format.Line.ForeColor.RGB = RGB(0, 0, 0)
+      .SeriesCollection(15).Format.Line.ForeColor.RGB = RGB(0, 0, 0)
+      .SeriesCollection(16).Format.Line.ForeColor.RGB = RGB(0, 0, 0)
+  
+      'Modify line weights
+      For Each srLineWts In .SeriesCollection
+            srLineWts.Format.Line.Weight = 1#
+      Next srLineWts
+   
+      'Modify line styles
+      .SeriesCollection(1).Format.Line.DashStyle = msoLineSysDash
+      .SeriesCollection(2).Format.Line.DashStyle = msoLineSysDash
+      .SeriesCollection(3).Format.Line.DashStyle = msoLineSysDash
+      .SeriesCollection(4).Format.Line.DashStyle = msoLineSysDash
+      .SeriesCollection(5).Format.Line.DashStyle = msoLineSysDash
+      .SeriesCollection(6).Format.Line.DashStyle = msoLineSysDash
+      .SeriesCollection(7).Format.Line.DashStyle = msoLineSysDash
+      .SeriesCollection(9).Format.Line.Visible = msoFalse
+      .SeriesCollection(10).Format.Line.Visible = msoFalse
+      .SeriesCollection(11).Format.Line.Visible = msoFalse
+      .SeriesCollection(12).Format.Line.Visible = msoFalse
+      .SeriesCollection(13).Format.Line.Visible = msoFalse
+      .SeriesCollection(14).Format.Line.Visible = msoFalse
+      .SeriesCollection(15).Format.Line.Visible = msoFalse
+      .SeriesCollection(16).Format.Line.Visible = msoFalse
+      
+      'Modify line marker colors
+      .SeriesCollection(8).MarkerBackgroundColor = RGB(0, 0, 0)
+      .SeriesCollection(9).MarkerBackgroundColor = RGB(128, 100, 162)
+      .SeriesCollection(10).MarkerBackgroundColor = RGB(192, 80, 77)
+      .SeriesCollection(11).MarkerBackgroundColor = RGB(75, 172, 198)
+      .SeriesCollection(12).MarkerBackgroundColor = RGB(155, 187, 89)
+      .SeriesCollection(13).MarkerBackgroundColor = RGB(155, 187, 89)
+      .SeriesCollection(14).MarkerBackgroundColor = RGB(75, 172, 198)
+      .SeriesCollection(15).MarkerBackgroundColor = RGB(192, 80, 77)
+      .SeriesCollection(16).MarkerBackgroundColor = RGB(128, 100, 162)
+      .SeriesCollection(9).MarkerForegroundColor = RGB(128, 100, 162)
+      .SeriesCollection(10).MarkerForegroundColor = RGB(192, 80, 77)
+      .SeriesCollection(11).MarkerForegroundColor = RGB(75, 172, 198)
+      .SeriesCollection(12).MarkerForegroundColor = RGB(155, 187, 89)
+      .SeriesCollection(13).MarkerForegroundColor = RGB(155, 187, 89)
+      .SeriesCollection(14).MarkerForegroundColor = RGB(75, 172, 198)
+      .SeriesCollection(15).MarkerForegroundColor = RGB(192, 80, 77)
+      .SeriesCollection(16).MarkerForegroundColor = RGB(128, 100, 162)
+      
+      'Modify line marker sizes
+      .SeriesCollection(8).MarkerSize = 2
+      .SeriesCollection(9).MarkerSize = 5
+      .SeriesCollection(10).MarkerSize = 5
+      .SeriesCollection(11).MarkerSize = 5
+      .SeriesCollection(12).MarkerSize = 5
+      .SeriesCollection(13).MarkerSize = 5
+      .SeriesCollection(14).MarkerSize = 5
+      .SeriesCollection(15).MarkerSize = 5
+      .SeriesCollection(16).MarkerSize = 5
+      
+      'Modify line marker styles
+      .SeriesCollection(1).MarkerStyle = xlMarkerStyleNone
+      .SeriesCollection(2).MarkerStyle = xlMarkerStyleNone
+      .SeriesCollection(3).MarkerStyle = xlMarkerStyleNone
+      .SeriesCollection(4).MarkerStyle = xlMarkerStyleNone
+      .SeriesCollection(5).MarkerStyle = xlMarkerStyleNone
+      .SeriesCollection(6).MarkerStyle = xlMarkerStyleNone
+      .SeriesCollection(7).MarkerStyle = xlMarkerStyleNone
+      .SeriesCollection(8).MarkerStyle = xlMarkerStyleSquare
+      .SeriesCollection(9).MarkerStyle = xlMarkerStyleCircle
+      .SeriesCollection(10).MarkerStyle = xlMarkerStyleCircle
+      .SeriesCollection(11).MarkerStyle = xlMarkerStyleCircle
+      .SeriesCollection(12).MarkerStyle = xlMarkerStyleCircle
+      .SeriesCollection(13).MarkerStyle = xlMarkerStyleCircle
+      .SeriesCollection(14).MarkerStyle = xlMarkerStyleCircle
+      .SeriesCollection(15).MarkerStyle = xlMarkerStyleCircle
+      .SeriesCollection(16).MarkerStyle = xlMarkerStyleCircle
+      
+      'Add title
+      .HasTitle = True
+      .ChartTitle.Text = "Xbar Chart of Formaldehyde Retention Time"
+      
+      'Add axes
+      .HasAxis(xlCategory, xlPrimary) = True
+      .HasAxis(xlValue, xlPrimary) = True
+      
+      'Modify axis range
+      .Axes(xlValue).MinimumScale = Application.WorksheetFunction.Min(Sheet3.Range("H3:H" & lastRow))
+      .Axes(xlValue).MaximumScale = Application.WorksheetFunction.Max(Sheet3.Range("H3:H" & lastRow))
+      .Axes(xlCategory).MinimumScale = Application.WorksheetFunction.Min(Sheet3.Range("AA3:AA" & lastRow))
+      .Axes(xlCategory).MaximumScale = Application.WorksheetFunction.Max(Sheet3.Range("AA3:AA" & lastRow))
+      
+      'Add axes titles
+      .Axes(xlCategory, xlPrimary).HasTitle = True
+      .Axes(xlCategory, xlPrimary).AxisTitle.Characters.Text = "Series Number (batches of n = " & n & ")"
+      .Axes(xlValue, xlPrimary).HasTitle = True
+      .Axes(xlValue, xlPrimary).AxisTitle.Characters.Text = "Average Retention Time (min)"
+      
+      'Add legend
+      .HasLegend = True
+      
+   End With
+End Sub
