@@ -1,7 +1,7 @@
 Sub deleteChart()
     Dim allCharts As ChartObject
     
-    Worksheets("SheetName").Activate
+    Worksheets("Sheet1Name").Activate
     
     For Each allCharts In ActiveSheet.ChartObjects
         allCharts.Delete
