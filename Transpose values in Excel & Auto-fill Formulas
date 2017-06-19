@@ -14,15 +14,14 @@ Sub transposeCells()
     Dim k As Integer
     Dim j As Integer
     Dim m As Integer
+    Dim n As Integer
     Dim rng1 As Range
     Dim rng2 As Range
     Dim rng3 As Range
     Dim rng4 As Range
     Dim rng5 As Range
     Dim rng6 As Range
-    Dim myChart As Chart
-    Dim sr As Series
-    Dim srLineWts As Series
+    Dim lastRow as Integer
     
     'set initial values
     j = 1
