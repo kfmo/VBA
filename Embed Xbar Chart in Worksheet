@@ -11,18 +11,18 @@ Sub embedXbarChart()
       
     'Create a new chart
     Set myXbarChart = Charts.Add
-    Set myXbarChart = myXbarChart.Location(Where:=xlLocationAsObject, Name:="DailyInput left column")
+    Set myXbarChart = myXbarChart.Location(Where:=xlLocationAsObject, Name:="Sheet1Name")
     
     With myXbarChart
       .ChartType = xlXYScatterLines
       
       'Set data source range
-      .SetSourceData Source:=Sheets("Form-RT_Calc_DailyInputLeftCol").Range("I3:P" & lastRow), PlotBy:=xlColumns
-      .SeriesCollection.Add Sheets("Form-RT_Calc_DailyInputLeftCol").Range("H3:H" & lastRow)
-      .SeriesCollection.Add Source:=Sheets("Form-RT_Plot_DailyInputLeftCol").Range("K3:S" & lastRow)
+      .SetSourceData Source:=Sheets("Sheet3Name").Range("I3:P" & lastRow), PlotBy:=xlColumns
+      .SeriesCollection.Add Sheets("Sheet3Name").Range("H3:H" & lastRow)
+      .SeriesCollection.Add Source:=Sheets("Sheet4Name").Range("K3:S" & lastRow)
       
       For Each sr In .SeriesCollection
-          sr.XValues = Sheets("Form-RT_Calc_DailyInputLeftCol").Range("AA3:AA" & lastRow)
+          sr.XValues = Sheets("Sheet3Name").Range("AA3:AA" & lastRow)
       Next sr
    
       'Name series
@@ -133,7 +133,7 @@ Sub embedXbarChart()
       
       'Add title
       .HasTitle = True
-      .ChartTitle.Text = "Xbar Chart of Formaldehyde Retention Time"
+      .ChartTitle.Text = "Xbar Chart Title"
       
       'Add axes
       .HasAxis(xlCategory, xlPrimary) = True
@@ -149,7 +149,7 @@ Sub embedXbarChart()
       .Axes(xlCategory, xlPrimary).HasTitle = True
       .Axes(xlCategory, xlPrimary).AxisTitle.Characters.Text = "Series Number (batches of n = " & n & ")"
       .Axes(xlValue, xlPrimary).HasTitle = True
-      .Axes(xlValue, xlPrimary).AxisTitle.Characters.Text = "Average Retention Time (min)"
+      .Axes(xlValue, xlPrimary).AxisTitle.Characters.Text = "Y-axis Title"
       
       'Add legend
       .HasLegend = True
