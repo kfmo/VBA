@@ -11,18 +11,18 @@ Sub embedRChart()
       
     'Create a new chart
     Set myRChart = Charts.Add
-    Set myRChart = myRChart.Location(Where:=xlLocationAsObject, Name:="DailyInput left column")
+    Set myRChart = myRChart.Location(Where:=xlLocationAsObject, Name:="Sheet1Name")
     
     With myRChart
       .ChartType = xlXYScatterLines
       
       'Set data source range
-      .SetSourceData Source:=Sheets("Form-RT_Calc_DailyInputLeftCol").Range("S3:Y" & lastRow), PlotBy:=xlColumns
-      .SeriesCollection.Add Sheets("Form-RT_Calc_DailyInputLeftCol").Range("R3:R" & lastRow)
-      .SeriesCollection.Add Source:=Sheets("Form-RT_Plot_DailyInputLeftCol").Range("AM3:AT" & lastRow)
+      .SetSourceData Source:=Sheets("Sheet3Name").Range("S3:Y" & lastRow), PlotBy:=xlColumns
+      .SeriesCollection.Add Sheets("Sheet3Name").Range("R3:R" & lastRow)
+      .SeriesCollection.Add Source:=Sheets("Sheet4Name").Range("AM3:AT" & lastRow)
       
       For Each sr In .SeriesCollection
-          sr.XValues = Sheets("Form-RT_Calc_DailyInputLeftCol").Range("AA3:AA" & lastRow)
+          sr.XValues = Sheets("Sheet3Name").Range("AA3:AA" & lastRow)
       Next sr
    
       'Name series
@@ -122,7 +122,7 @@ Sub embedRChart()
       
       'Add title
       .HasTitle = True
-      .ChartTitle.Text = "Range Chart of Formaldehyde Retention Time"
+      .ChartTitle.Text = "Range Chart Title"
       
       'Add axes
       .HasAxis(xlCategory, xlPrimary) = True
@@ -138,7 +138,7 @@ Sub embedRChart()
       .Axes(xlCategory, xlPrimary).HasTitle = True
       .Axes(xlCategory, xlPrimary).AxisTitle.Characters.Text = "Series Number (batches of n = " & n & ")"
       .Axes(xlValue, xlPrimary).HasTitle = True
-      .Axes(xlValue, xlPrimary).AxisTitle.Characters.Text = "Average Retention Time (min)"
+      .Axes(xlValue, xlPrimary).AxisTitle.Characters.Text = "Y-axis Title"
       
       'Add legend
       .HasLegend = True
