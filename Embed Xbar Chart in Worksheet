@@ -10,8 +10,8 @@ Sub embedXbarChart()
     lastRow = 20 'arbitrary - see transposeCells for details
       
     'Create a new chart
-    Set myXbarChart = Charts.Add
-    Set myXbarChart = myXbarChart.Location(Where:=xlLocationAsObject, Name:="Sheet1Name")
+    Worksheets("Sheet1Name").Activate
+    Set myXbarChart = ActiveSheet.Shapes.AddChart.Chart
     
     With myXbarChart
       .ChartType = xlXYScatterLines
