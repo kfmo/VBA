@@ -44,7 +44,7 @@ Skipped_copyEndCell:
     If Not endCell Is Nothing Then
         Set cellRange = Sheet1.Range(startCell.Address & ":" & endCell.Address)
     Else 'iterate to last value in range
-        Set endCell = Sheet1.Range("E13")
+        Set endCell = Sheet1.Range(startCell.Address)
         Set cellRange = Sheet1.Range(startCell.Address & ":" & endCell.End(xlDown).Address)
     End If
         
