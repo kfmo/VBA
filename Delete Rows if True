@@ -5,8 +5,9 @@ Sub delRows()
           
     'set first row with data
     Const startRow As Long = 2 
-    'activate sheet
-    Set ws = Worksheet("SheetName").Activate 
+    'activate sheet and set ws
+    Worksheets("SheetName").Activate
+    Set ws = ActiveSheet 
           
     Application.ScreenUpdating = False 
     With ws 
@@ -14,6 +15,8 @@ Sub delRows()
         For i = lastRow To startRow Step -1 
             If .Cells(i, "A").Value = 0 Then 
                 .Cells(i, "A").EntireRow.Delete 
+            Elseif .Cells(i, "A").Value = "" Then 
+                .Cells(i, "A").EntireRow.Delete
             End If 
         Next i 
     End With 
