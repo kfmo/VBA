@@ -1,0 +1,21 @@
+Sub delRows() 
+    Dim lastRow As Long 
+    Dim i As Long
+    Dim ws As Worksheet 
+          
+    'set first row with data
+    Const startRow As Long = 2 
+    'activate sheet
+    Set ws = Worksheet("SheetName").Activate 
+          
+    Application.ScreenUpdating = False 
+    With ws 
+        lastRow = .Cells(.Rows.Count, "A").End(xlUp).Row 
+        For i = lastRow To startRow Step -1 
+            If .Cells(i, "A").Value = 0 Then 
+                .Cells(i, "A").EntireRow.Delete 
+            End If 
+        Next i 
+    End With 
+    Application.ScreenUpdating = True 
+End Sub 
