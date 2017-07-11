@@ -1,0 +1,11 @@
+Sub runPy()
+
+  Dim RetVal As Variant
+  
+  'Different dir paths
+  RetVal = Shell("""full path to python.exe"" ""full path to your python script""")
+
+  'Same path
+  RetVal = Shell("""full path to python.exe"" ""\python script name""")
+ 
+End Sub
