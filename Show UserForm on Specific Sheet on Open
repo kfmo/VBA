@@ -1,0 +1,4 @@
+Private Sub Workbook_Open()
+    Application.Sheets("Sheet1").Select
+    UserForm1.Show vbModal
+End Sub
