@@ -1,0 +1,11 @@
+Sub deleteSheets()
+  Application.DisplayAlerts = False
+    For Each s In ThisWorkbook.Worksheets
+        If s.Name = "Sheet1" Or s.Name = "Sheet2" Then
+            s.Visible = True
+            s.Activate
+            ActiveSheet.Select
+            ActiveWindow.SelectedSheets.Delete
+        End If
+    Next s
+End Sub
