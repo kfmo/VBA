@@ -1,0 +1,117 @@
+'User to provide filename
+Sub openSpecifiedFile()
+  On Error GoTo fatalError
+      filename = InputBox("Please input the name of the .xlsx file to be opened", _
+          "Which File to Open?")
+      category = InputBox("Which category to pull from?", "Which Category?")  'Additional categorical info, if needed
+
+      'Check if filename is open, and open if not
+      n = 0
+      For Each wb In Workbooks
+          If wb.Name <> filename & ".xlsx" Then
+              n = n + 1
+              If n = Workbooks.Count Then
+                  Workbooks.Open filename:=ThisWorkbook.Path & "\[filepath]\" & filename & ".xlsx"
+                  Set wsNew = Workbooks(filename).Sheets("Sheet1")
+                  Exit For
+              End If
+          Else
+              Set wsNew = Workbooks(filename).Sheets("Sheet1")
+              Exit For
+          End If
+      Next wb
+
+      If UCase([category]) = "A" Then
+          col = 2
+      ElseIf UCase([category]) = "B" Then
+          col = 3
+      ElseIf UCase([category]) = "C" Then
+          col = 4
+      ElseIf UCase([category]) = "D" Then
+          col = 5
+      ElseIf UCase([category]) = "E" Then
+          col = 6
+      Else
+          GoTo fatalError
+      End If
+  On Error GoTo -1
+      
+fatalError:
+If wsNew Is Nothing Then
+    MsgBox "A fatal error occurred.  Check all file and tab names before retrying to " & _
+    "make sure that the names are correct and the files are in the correct directory." & _
+    "  Also, make sure that the correct category name was inputted.  If everything " & _
+    "looks good, try again after closing all Excel processes via Task Manager."
+End If
+
+End Sub
+
+
+'Open all files of specific format/extension in a directory
+Sub openAllFiles()
+  On Error GoTo fatalError
+        filename = Dir(ThisWorkbook.Path & "\*" & "xlsx")
+        Do While filename <> ""
+            i = 0
+            For Each wb In Workbooks
+                If wb.Name <> filename Then
+                    i = i + 1
+                    If i = Workbooks.Count Then
+                        Application.Workbooks.Open filename:=ThisWorkbook.Path & "\" & filename
+                        fname = Left(filename, InStrRev(filename, ".") - 1)
+                        For Each sht In Workbooks(fname).Sheets
+                            If sht.Name = "Sheet1" Then
+                                Set wb1 = Workbooks(fname)
+                                Exit For
+                            ElseIf sht.Name = "Sheet2" Then
+                                Set wb2 = Workbooks(fname)
+                                Exit For
+                            End If
+                        Next sht
+                    End If
+                Else
+                    fname = Left(filename, InStrRev(filename, ".") - 1)
+                    For Each sht In Workbooks(fname).Sheets
+                        If sht.Name = "Sheet1" Then
+                            Set wb1 = Workbooks(fname)
+                            Exit For
+                        ElseIf sht.Name = "Sheet2" Then
+                            Set wb2 = Workbooks(fname)
+                            Exit For
+                        End If
+                    Next sht
+                    Exit For
+                End If
+            Next wb
+            filename = Dir
+        Loop
+    On Error GoTo -1
+    
+fatalError:
+If wb1 Is Nothing Or wb2 Is Nothing Then
+    MsgBox "A fatal error occurred.  Check all file and tab names before retrying to " & _
+    "make sure that the names are correct and the files are in the correct directory." & _
+    "  If everything looks good, try again after closing all Excel processes" & _
+    "via Task Manager."
+End If
+
+End Sub
+
+
+'Close specific workbooks
+Sub closeSpecificFile()
+  If Not wb1 Is Nothing Then
+      wb1.Close SaveChanges:=False
+  End If
+  If Not wb2 Is Nothing Then
+      wb2.Close SaveChanges:=False
+  End If
+End Sub
+
+
+'Close all workbooks
+Sub closeAllFiles()
+  For Each wb In Workbooks
+    wb.Close SaveChanges:=False
+  next wb
+End Sub
